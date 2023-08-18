@@ -217,6 +217,7 @@ class GroupCoordinator(BaseCoordinator):
                  exclude_internal_topics=True,
                  max_poll_interval_ms=300000,
                  rebalance_timeout_ms=30000
+                 max_unresponsive_time_ms=None
                  ):
         """Initialize the coordination manager.
 
@@ -233,6 +234,7 @@ class GroupCoordinator(BaseCoordinator):
         self._heartbeat_interval_ms = heartbeat_interval_ms
         self._max_poll_interval = max_poll_interval_ms / 1000
         self._rebalance_timeout_ms = rebalance_timeout_ms
+        self._max_unresponsive_time = max_unresponsive_time_ms or session_timeout_ms * 10
         self._retry_backoff_ms = retry_backoff_ms
         self._assignors = assignors
         self._enable_auto_commit = enable_auto_commit
@@ -743,6 +745,10 @@ class GroupCoordinator(BaseCoordinator):
                 # the session timeout has expired without seeing a successful
                 # heartbeat, so we should probably make sure the coordinator
                 # is still healthy.
+                if session_time > self._max_unresponsive_time:
+                    raise RuntimeError(
+                        f"Reached maximum time without responding: {session_time}. Crashing."
+                    )
                 log.error(
                     "Heartbeat session expired - marking coordinator dead")
                 self.coordinator_dead()

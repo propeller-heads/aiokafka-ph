@@ -248,6 +248,7 @@ class AIOKafkaConsumer:
                  session_timeout_ms=10000,
                  heartbeat_interval_ms=3000,
                  consumer_timeout_ms=200,
+                 max_unresponsive_time_ms=None,
                  max_poll_records=None,
                  ssl_context=None,
                  security_protocol='PLAINTEXT',
@@ -260,7 +261,8 @@ class AIOKafkaConsumer:
                  sasl_plain_username=None,
                  sasl_kerberos_service_name='kafka',
                  sasl_kerberos_domain_name=None,
-                 sasl_oauth_token_provider=None):
+                 sasl_oauth_token_provider=None
+                ):
         if loop is None:
             loop = get_running_loop()
         else:
@@ -392,6 +394,7 @@ class AIOKafkaConsumer:
                 exclude_internal_topics=self._exclude_internal_topics,
                 rebalance_timeout_ms=self._rebalance_timeout_ms,
                 max_poll_interval_ms=self._max_poll_interval_ms
+                max_unresponsive_time_ms=max_unresponsive_time_ms,
             )
             if self._subscription.subscription is not None:
                 if self._subscription.partitions_auto_assigned():
